@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
@@ -29,6 +30,7 @@ class PieChartPainter extends CustomPainter {
   final DegreeOptions degreeOptions;
   final Color baseChartColor;
   final double? totalValue;
+  final List<ui.Image>? legendIcons;
 
   late double _prevAngle;
 
@@ -57,6 +59,7 @@ class PieChartPainter extends CustomPainter {
     this.degreeOptions = const DegreeOptions(),
     required this.baseChartColor,
     this.totalValue,
+    this.legendIcons,
   }) {
     // set total value
     if (totalValue == null) {
@@ -187,10 +190,12 @@ class PieChartPainter extends CustomPainter {
 
           if (showChartValues) {
             final name = showValuesInPercentage == true
-                ? ('${((_subParts.elementAt(i) / _total) * 100)
-                        .toStringAsFixed(decimalPlaces!)}%')
+                ? ('${((_subParts.elementAt(i) / _total) * 100).toStringAsFixed(decimalPlaces!)}%')
                 : value;
-            _drawName(canvas, name, x, y, side);
+            _drawName(canvas, name, x, y, side,
+                image: legendIcons != null && legendIcons!.length > i
+                    ? legendIcons![i]
+                    : null);
           }
         }
         _prevAngle = _prevAngle + (((_totalAngle) / _total) * _subParts[i]);
@@ -213,6 +218,7 @@ class PieChartPainter extends CustomPainter {
     double y,
     double side, {
     TextStyle? style,
+    ui.Image? image,
   }) {
     final span = TextSpan(
       style: style ?? chartValueStyle,
@@ -246,6 +252,15 @@ class PieChartPainter extends CustomPainter {
         (side / 2 + y) - (tp.height / 2),
       ),
     );
+    if (image != null) {
+      canvas.drawImage(
+          image,
+          Offset(
+            (side / 2 + x + 10) - (tp.width / 2),
+            (side / 2 + y + 17) - (tp.height / 2),
+          ),
+          Paint());
+    }
   }
 
   @override
